@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.js"
+    "start": "nodemon src/index.js",
+    "seed": "node src/helpers/seed.js"
   },
   "author": "Daniel Atuma",
   "license": "ISC",
   "dependencies": {
     "boom": "^7.3.0",
+    "faker": "^4.1.0",
     "fastify": "^2.13.0",
     "fastify-swagger": "^2.5.0",
     "mongoose": "^5.9.7",
