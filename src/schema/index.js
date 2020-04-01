@@ -44,23 +44,68 @@ const carType = new GraphQLObjectType({
 
 const ownerType = new GraphQLObjectType({
     name: 'Owner',
-    fields: () => ({})
+    fields: () => ({
+        _id: { type: GraphQLID },
+        firstName: { type: GraphQLString },
+        lastName: { type: GraphQLString },
+        email: { type: GraphQLString },
+        cars: {
+            type: new GraphQLList(carType),
+            async resolve(parent, args) {
+                return await ownerController.getOwnersCars({ id: parent._id })
+            }
+        }
+    })
 
 });
 
 const serviceType = new GraphQLObjectType({
     name: 'Service',
-    fields: () => ({})
+    fields: () => ({
+        _id: { type: GraphQLID },
+        car_id: { type: GraphQLID },
+        name: { type: GraphQLString },
+        date: { type: GraphQLString },
+        car: {
+            type: carType,
+            async resolve(parent, args) {
+                return await carController.getSingleCar({ id: parent.car_id })
+            }
+        }
+    })
 });
 
 // Define Root Query
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-        car: {},
-        cars: {},
-        owner: {},
-        service: {}
+        car: {
+            type: carType,
+            args: { id: { type: GraphQLID } },
+            async resolve(parent, args) {
+                return await carController.getSingleCar(args)
+            }
+        },
+        cars: {
+            type: new GraphQLList(carType),
+            async resolve(parent, args) {
+                return await carController.getCars()
+            }
+        },
+        owner: {
+            type: ownerType,
+            args: { id: { type: GraphQLID } },
+            async resolve(parent, args) {
+                return await ownerController.getSingleOwner(args)
+            }
+        },
+        service: {
+            type: serviceType,
+            args: { id: { type: GraphQLID } },
+            async resolve(parent, args) {
+                return await serviceController.getSingleService(args)
+            }
+        }
     }
 });
 
@@ -70,24 +115,41 @@ const Mutations = new GraphQLObjectType({
     fields: {
         addCar: {
             type: carType,
-            args: {},
-            async resolve(args) {
-                return ''
+            args: {
+                title: { type: new GraphQLNonNull(GraphQLString) },
+                brand: { type: new GraphQLNonNull(GraphQLString) },
+                price: { type: GraphQLString },
+                age: { type: GraphQLInt },
+                owner_id: { type: GraphQLID }
+            },
+            async resolve(parent, args) {
+                const data = await carController.addCar(args);
+                return data
             }
         },
-
         editCar: {
             type: carType,
-            args: {},
-            async resolve(args) {
-                return ''
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+                title: { type: new GraphQLNonNull(GraphQLString) },
+                brand: { type: new GraphQLNonNull(GraphQLString) },
+                price: { type: new GraphQLNonNull(GraphQLString) },
+                age: { type: new GraphQLNonNull(GraphQLInt) },
+                owner_id: { type: GraphQLID }
+            },
+            async resolve(parent, args) {
+                const data = await carController.updateCar(args);
+                return data
             }
         },
         deleteCar: {
             type: carType,
-            args: {},
-            async resolve(args) {
-                return ''
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) }
+            },
+            async resolve(parent, args) {
+                const data = await carController.deleteCar(args);
+                return data
             }
         }
     }
